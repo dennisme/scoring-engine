@@ -1,0 +1,31 @@
+IPv4 Mobility
+- Change IPs
+
+DNS Forward
+- A, AAAA
+- Query (puppet.yzguy.io)
+- Expected Response
+
+DNS Reverse
+- PTR
+- Query (10.235.5.6)
+- Expected Response
+
+HTTP/S Available
+- HTTP 200
+
+HTTP/S Content
+- HTTP 200 & Pattern
+
+FTP Upload
+- Upload File Okay
+
+FTP Download File
+- Download Okay
+- Correct text in file
+
+SMTP
+- Send Email
+
+POP3/IMAP
+- Receive Email
