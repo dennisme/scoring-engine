@@ -2,13 +2,13 @@
 #
 # Forward DNS Lookup Check
 #
-# Accepts 3 arguments
-# qname, rdtype, and resip
+# Accepts 4 arguments
+# qname, rdtype, resip, nameserver
 #
 # qname - Query Name (www.yzguy.com)
 # rdtype - Query Type (A, AAAA, MX)
 # resip - Response IP or Response (10.235.5.2, email.yzguy.com.)
-# nameserv - Nameserver IP (8.8.8.8)
+# nameserver - Nameserver IP (8.8.8.8)
 
 import dns.resolver, sys
 
@@ -16,12 +16,12 @@ if (len(sys.argv) == 5):
     qname = sys.argv[1]
     rdtype = sys.argv[2]
     respip = sys.argv[3]
-    nameserv = sys.argv[4]
+    nameserver = sys.argv[4]
     
     try:
         resolver = dns.resolver.Resolver()
         resolver.lifetime = 3.0
-        resolver.nameservers = [nameserv]
+        resolver.nameservers = [nameserver]
         resp = resolver.query(qname, rdtype)
         
         if (resp.rrset.to_text()[(len(respip)*-1):] == respip):
