@@ -1,4 +1,6 @@
-#!venv/bin/python
+#!/usr/bin/python
+#
+# Dependencies: dnspython
 #
 # DNS Lookup Check
 #
