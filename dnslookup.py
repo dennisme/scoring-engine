@@ -39,7 +39,8 @@ if (len(sys.argv) == 5):
 
         def failed():
             print "FAIL: ", resp.rrset.to_text()
-        
+            sys.exit(1)
+
         if (resplen > 1):
             for line in resp:
                 ans = line.to_text()[(len(expans)*-1):]
