@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Dependencies: dnspython
+# Dependencies: dnspython (http://www.dnspython.org/)
 #
 # DNS Lookup Check
 #
