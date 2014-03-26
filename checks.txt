@@ -1,24 +1,22 @@
 IPv4 Mobility
 - Change IPs
 
-DNS Forward
-- A, AAAA
-- Query (puppet.yzguy.io)
-- Expected Response
-
-DNS Reverse
-- PTR
-- Query (10.235.5.6)
-- Expected Response
-
 HTTP/S Available
 - HTTP 200
+- Grab Random Page, is it a 200?
+- Random Referrer, Random User-agent, timeout
+- Hash page first time and store, compare against
+- Random pages?
 
 HTTP/S Content
 - HTTP 200 & Pattern
+- Same as above,
+- Don't verify certificate
 
 FTP Upload
 - Upload File Okay
+- Have different files
+- Upload as one user, download as another
 
 FTP Download File
 - Download Okay
