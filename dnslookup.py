@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!venv/bin/python
 #
 # Dependencies: dnspython (http://www.dnspython.org/)
 #
@@ -55,7 +55,6 @@ if (len(sys.argv) == 5):
                 else:
                     failed()
         else:
-            print resp.rrset.to_text()[(len(expans)*-1):]
             if (resp.rrset.to_text()[(len(expans)*-1):] == expans):
                 passed()
             else:
