@@ -14,8 +14,8 @@ if (len(sys.argv) == 3):
     page = pages[random.randint(0,len(pages) - 1)]
     fulluri = proto + "://" + ipaddr + page
     useragent = { 'User-Agent': useragents[random.randint(0, len(useragents) - 1)] }
+    
     request  = urllib2.Request(fulluri, None, headers=useragent)
-    print fulluri
     response = urllib2.urlopen(request)
     html = response.read()
 
