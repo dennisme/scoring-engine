@@ -1,1117 +1,1116 @@
--# Introduction
+# Introduction
 
--
 
--Cyberengine is the combination of a Ruby on Rails web front-end and backend service checks. Cyberengine is designed to check and score common network services used in "blueteam-redteam-whiteteam" competitions and provide a web interface for teams about their servers and services.
 
--
+Cyberengine is the combination of a Ruby on Rails web front-end and backend service checks. Cyberengine is designed to check and score common network services used in "blueteam-redteam-whiteteam" competitions and provide a web interface for teams about their servers and services.
 
--
 
--## Setup Overview
 
--
 
--* There are many **Teams** of type _white_, _red_, and _blue_
 
--* A team can have many **Members** 
+## Setup Overview
 
--* **Teams** have many **Servers**
 
--* **Servers** have many **Services** each defining a _protocol_ (dns, ftp, ssh...) and _version_ (ipv4 or ipv6) 
 
--* **Services** have many **Properties** that outline how the **Service** will be checked
+* There are many **Teams** of type _white_, _red_, and _blue_
 
--* **Properties** include the _address_, timeout period, options, and random options for checks
+* A team can have many **Members**
 
--* **Services** can have many **Users** that have a _username_/ _password_ and are randomly selected in checks
+* **Teams** have many **Servers**
 
--* **Services** have many **Checks** that are _pass_ or _fail_ and provide information about the request/response
+* **Servers** have many **Services** each defining a _protocol_ (dns, ftp, ssh...) and _version_ (ipv4 or ipv6)
 
--
+* **Services** have many **Properties** that outline how the **Service** will be checked
 
--
+* **Properties** include the _address_, timeout period, options, and random options for checks
 
--## Cyberengine Checks Installation Process 
+* **Services** can have many **Users** that have a _username_/ _password_ and are randomly selected in checks
 
--### Tested on a minimal Fedora 17 installation (must be root)
+* **Services** have many **Checks** that are _pass_ or _fail_ and provide information about the request/response
 
--
 
--1. Disable selinux
 
--```bash
 
--# Disable selinux
 
--echo 'SELINUX=disabled' >> /etc/selinux/config
+## Cyberengine Checks Installation Process
 
--# Dont need iptables messing things up for now
+### Tested on a minimal Fedora 17 installation (must be root)
 
--systemctl stop iptables.service
 
--systemctl disable iptables.service
 
--reboot
+1. Disable selinux
 
--```
+```bash
 
--
+# Disable selinux
 
--2. Install all required packages for: checks, rvm/ruby, database, and apache
+echo 'SELINUX=disabled' >> /etc/selinux/config
 
--```bash
+# Dont need iptables messing things up for now
 
--# Basic/Checks
+systemctl stop iptables.service
 
--yum install -y bash tar git curl curl-devel vim bind-utils iputils iproute
+systemctl disable iptables.service
 
--# RVM/Ruby (copied from: rvm requirements) 
+reboot
 
--yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel libxslt-devel libxml2-devel
+```
 
--# Database
 
--yum install -y postgresql postgresql-devel
 
--```
+2. Install all required packages for: checks, rvm/ruby, database, and apache
 
--
+```bash
 
--3. Install ruby (version >= 1.9.3) via Ruby Version Manager (RVM) - https://rvm.io/rvm/install
+# Basic/Checks
 
--```bash
+yum install -y bash tar git curl curl-devel vim bind-utils iputils iproute
 
--curl -kL https://get.rvm.io | bash -s stable
+# RVM/Ruby (copied from: rvm requirements)
 
--source /etc/profile.d/rvm.sh
+yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel libxslt-devel libxml2-devel
 
--rvm install 1.9.3 --verify-downloads 1
+# Database
 
--rvm use 1.9.3 --default
+yum install -y postgresql postgresql-devel
 
--# Answer yes to any 'cp: overwrite' options
+```
 
--```
 
--
+3. Install ruby (version >= 1.9.3) via Ruby Version Manager (RVM) - https://rvm.io/rvm/install
 
--4. Download cyberengine checks and install gems (libraries)
+```bash
 
--```bash
+curl -kL https://get.rvm.io | bash -s stable
 
--cd /var
+source /etc/profile.d/rvm.sh
 
--git clone -v https://github.com/griffithchaffee/cyberengine-checks.git
+rvm install 1.9.3 --verify-downloads 1
 
--# If you dont do this you may get permission errors
+rvm use 1.9.3 --default
 
--cd cyberengine-checks
+# Answer yes to any 'cp: overwrite' options
 
--# Do you wish to trust this .rvmrc file? (/root/cyberengine/.rvmrc)
+```
 
--# y[es], n[o], v[iew], c[ancel]> yes
 
--bundle install
 
--# Set correct database configuration options
+4. Download cyberengine checks and install gems (libraries)
 
--vi database.yml # COMMENT OUT UNUSED ENVIRONMENTS
+```bash
 
--```
+cd /var
 
--
+git clone -v https://github.com/griffithchaffee/cyberengine-checks.git
 
--## Checks
+# If you dont do this you may get permission errors
 
--
+cd cyberengine-checks
 
--### Basics
+# Do you wish to trust this .rvmrc file? (/root/cyberengine/.rvmrc)
 
--* Checks are identified by their path
+# y[es], n[o], v[iew], c[ancel]> yes
 
--* version/protocol/check
+bundle install
 
--* The cyberengine executable is a fully functional wrapper that makes it easy to stop/start enable/disable checks
+# Set correct database configuration options
 
--* Checks can be run in the forground or as daemons. As a daemon they log to their log file and can be terminated by sending the TERM signal.
+vi database.yml # COMMENT OUT UNUSED ENVIRONMENTS
 
--
+```
 
--
 
--### Usage
 
--
+## Checks
 
--* Getting information
 
--
 
--```bash
+### Basics
 
--./cyberengine help
+* Checks are identified by their path
 
--Syntax: cyberengine.rb <command> <check> <check>...
+* version/protocol/check
 
--
+* The cyberengine executable is a fully functional wrapper that makes it easy to stop/start enable/disable checks
 
--<check>:
+* Checks can be run in the forground or as daemons. As a daemon they log to their log file and can be terminated by sending the TERM signal.
 
--all => match all checks
 
--ipv4/icmp/ping => match ipv4/icmp/ping check only
 
--
 
--<command>:
 
--disable => Disable checks
+### Usage
 
--disabled => Show disabled checks
 
--enable => Enable checks
 
--enabled => Show enabled checks
+* Getting information
 
--errors => Show errors
 
--help => Show help text
 
--list => Show all checks and enabled/disabled status
+```bash
 
--logs => Print all log files
+./cyberengine help
 
--pids => Print all pid files
+Syntax: cyberengine.rb <command> <check> <check>...
 
--start => Start checks
 
--status => Show running checks
 
--stop => Stop checks
+<check>:
 
--tail => Tail check log file
+all => match all checks
 
--test => Start check in test mode
+ipv4/icmp/ping => match ipv4/icmp/ping check only
 
--
 
--./cyberengine list
+
+<command>:
+
+disable => Disable checks
+
+disabled => Show disabled checks
+
+enable => Enable checks
+
+enabled => Show enabled checks
+
+errors => Show errors
+
+help => Show help text
+
+list => Show all checks and enabled/disabled status
+
+logs => Print all log files
+
+pids => Print all pid files
+
+start => Start checks
+
+status => Show running checks
+
+stop => Stop checks
+
+tail => Tail check log file
+
+test => Start check in test mode
+
+
+
+./cyberengine list
 
 -Enabled : ipv4/dns/domain-query
 
--Enabled : ipv4/ftp/download
+Enabled : ipv4/ftp/download
 
--Enabled : ipv4/ssh/login
+Enabled : ipv4/ssh/login
 
--...
+...
 
--
 
--./cyberengine enable ipv4/ssh/login
 
--```
+./cyberengine enable ipv4/ssh/login
 
--
+```
 
--* Start checks
 
--
+
+* Start checks
+
+
+
+```bash
+
+./cyberengine list
+
+./cyberengine enable all
+
+./cyberengine start ipv4/ssh/login
+
+```
+
+
+
+* Testing checks (no checks will be saved)
+
+
+
+```bash
+
+./cyberengine test ipv4/ssh/login
+
+```
+
+
+
+* Stopping checks
+
+
+
+```bash
+
+./cyberengine status
+
+./cyberengine stop ipv4/ssh/login # Check will stop at end of round
+
+# Optional way to stop the service
+
+kill -s TERM <pid>
+
+```
+
+
+
+* You can check for errors or watch log files
+
+
+
+
+
+```bash
+
+./cyberengine errors ipv4/ssh/login
+
+./cyberengine tail ipv4/ssh/login
+
+```
+
+
+
+* All macro makes it easy to do mass changes
+
+* No argument equals all
+
+
+
+```bash
+
+./cyberengine enable all
+
+./cyberengine enable # Same as above
+
+./cyberengine enabled
+
+```
+
+
+
+## Check Options
+
+
+
+### Properties
+
+
+
+* Defaults defined on whiteteam
+
+* Individual team options override whiteteam options
+
+* Properties always lowercase and hyphen delimiters - Example: Send Mail = send-mail
+
+
+
+#### Property Categories
+
+
+
+```bash
+
+# There are four property categories
+
+# Defines a service address (each check will be run against all addresses)
+
+category: 'address'
+
+# Defines a unique service property (DNS query type: A vs AAAA vs PTR)
+
+category: 'option'
+
+# Defines an property with many options (HTTP useragents)
+
+category: 'random'
+
+# Defines a property used to check for success/failure of a check
+
+category: 'answer'
+
+# Defines a property used temporarily (mostly in mobility)
+
+category: 'temp'
+
+```
+
+
+
+
+
+#### Defaults
+
+* All defaults are defined under whiteteam. These defaults are used if they are not defined for a team. The most common example is the timeout property which specifies after how many seconds a check should be cancled.
+
+* Typically answer properties are also defined at the whiteteam level but can be overridden per team. There are two common types of answer properties: full-text-regex and each-line-regex. If either of these match the check is deemed to pass. DNS is one service that does not use this, instead domain answers are defined on a per team level.
+
+* Majority of checks use unix command line tools such as curl. This is to make it easier to debug. While many could be completly written using a language library, it would be difficult to troubleshoot errors for both blueteams and whiteteam.
+
+
+
+
+
+## Mobility
+
+
+
+#### IPV4 Mobility
+
+
+
+* ipv4/none/mobility
+
+* This is not a service check and is only defined for whiteteam. This service is used to configure random source ipv4 addresses. A new address is added to an alias interface based on properties. For this address to be used routes must be provided. Each route will be assigned with the src option set to the new ip.
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "IPV4 Mobility", version: 'ipv4', protocol: 'none'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+category: 'random', property: 'address-range' # Range to pick random address from: 192.168.1.1-20/24 (sample address would be: 192.168.1.5/24)
+
+category: 'option', property: 'interface' # Interface to add the random address on
+
+category: 'option', property: 'dad_test' # Test used to see if arping failed
+
+category: 'option', property: 'route' # Each route option will be pulled and updated each time a new address is selected. A value of 'default' means the route is an IP and the default gateway.
+
+category: 'option', property: 'delay' # Delay between address changes
+
+```
+
+
+
+
+
+## Available Checks ##
+
+
+
+### DNS Domain Query
+
+
+
+* ipv4/dns/domain-query
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "DNS Domain Query", version: 'ipv4', protocol: 'dns'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'option', property: 'query-type' # A, AAAA, PTR
+
+category: 'random', property: 'query' # Example value: 'google-public-dns-a.google.com'
+
+# Answer option not required if using resolves-to-address option below
+
+category: 'answer', property: '<query-property>' # Example property: google-public-dns-a.google.com', value: '8.8.8.8'
+
+# Optional
+
+category: 'option', property: 'resolves-to-address' # enabled/disabled - Used if just want to check that IP resolves and dont care what it resolves to
+
+category: 'option', property: 'resolves-to-address-regex' # Regex used to check answers and usually matches ip addresses
+
+```
+
+
+
+### FTP Download
+
+
+
+* ipv4/ftp/download
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "FTP Download", version: 'ipv4', protocol: 'ftp'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+# Uses random user
+
+# Macro: $USER replaced with current user
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'option', property: 'filename' # file the check attempts to download. Can be a path such as /var/log/messages
+
+category: 'answer', property: 'each-line-regex'
+
+category: 'answer', property: 'full-text-regex'
+
+```
+
+
+
+### FTP Upload
+
+
+
+* ipv4/ftp/upload
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "FTP Upload", version: 'ipv4', protocol: 'ftp'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+# Uses random user
+
+# Macro: $USER replaced with current user
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'option', property: 'filename' # file the check attempts to upload
+
+category: 'option', property: 'filename-timestamp' # disabled = no filename timestamp
+
+category: 'answer', property: 'each-line-regex'
+
+category: 'answer', property: 'full-text-regex'
+
+```
+
+
+
+### FTPS Download
+
+
+
+* ipv4/ftps/download
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "FTPS Download", version: 'ipv4', protocol: 'ftps'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+# Uses random user
+
+# Macro: $USER replaced with current user
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'option', property: 'filename' # file the check attempts to download. Can be a path such as /var/log/messages
+
+category: 'answer', property: 'each-line-regex'
+
+category: 'answer', property: 'full-text-regex'
+
+```
+
+
+
+### FTPS Upload
+
+
+
+* ipv4/ftps/upload
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "FTPS Upload", version: 'ipv4', protocol: 'ftps'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+# Uses random user
+
+# Macro: $USER replaced with current user
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'option', property: 'filename' # file the check attempts to upload
+
+category: 'option', property: 'filename-timestamp' # disabled = no filename timestamp
+
+category: 'answer', property: 'each-line-regex'
+
+category: 'answer', property: 'full-text-regex'
+
+```
+
+
+
+### HTTP Available
+
+
+
+* ipv4/http/available
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "HTTP Available", version: 'ipv4', protocol: 'http'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'random', property: 'useragent'
+
+category: 'random', property: 'uri' # Appended to end of address to form URL
+
+category: 'answer', property: 'each-line-regex'
+
+category: 'answer', property: 'full-text-regex'
+
+```
+
+
+
+### HTTP Content
+
+
+
+* ipv4/http/available
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "HTTP Content", version: 'ipv4', protocol: 'http'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'random', property: 'useragent'
+
+category: 'random', property: 'uri' # Appended to end of address to form URL
+
+category: 'answer', property: 'each-line-regex'
+
+category: 'answer', property: 'full-text-regex'
+
+```
+
+
+
+### HTTPS Available
+
+
+
+* ipv4/https/available
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "HTTPS Available", version: 'ipv4', protocol: 'https'
+
+```
+
+
+
+#### Properties
+
+
 
 -```bash
 
--./cyberengine list
+category: 'address'
 
--./cyberengine enable all
+category: 'option', property: 'timeout'
 
--./cyberengine start ipv4/ssh/login
+category: 'random', property: 'useragent'
 
--```
+category: 'random', property: 'uri' # Appended to end of address to form URL
 
--
+category: 'answer', property: 'each-line-regex'
 
--* Testing checks (no checks will be saved)
+category: 'answer', property: 'full-text-regex'
 
--
+```
 
--```bash
 
--./cyberengine test ipv4/ssh/login
 
--```
+### HTTPS Content
 
--
 
--* Stopping checks
 
--
+* ipv4/https/available
 
--```bash
 
--./cyberengine status
 
--./cyberengine stop ipv4/ssh/login # Check will stop at end of round
+#### Service
 
--# Optional way to stop the service
 
--kill -s TERM <pid>
 
--```
+```bash
 
--
+name: "HTTPS Content", version: 'ipv4', protocol: 'https'
 
--* You can check for errors or watch log files
+```
 
--
 
--
+
+#### Properties
+
+
 
 -```bash
 
--./cyberengine errors ipv4/ssh/login
+category: 'address'
 
--./cyberengine tail ipv4/ssh/login
+category: 'option', property: 'timeout'
 
--```
+category: 'random', property: 'useragent'
 
--
+category: 'random', property: 'uri' # Appended to end of address to form URL
 
--* All macro makes it easy to do mass changes
+category: 'answer', property: 'each-line-regex'
 
--* No argument equals all
+category: 'answer', property: 'full-text-regex'
 
--
+```
 
--```bash
 
--./cyberengine enable all
 
--./cyberengine enable # Same as above
+### ICMP Ping
 
--./cyberengine enabled
 
--```
 
--
+* ipv4/icmp/ping
 
--## Check Options
 
--
 
--### Properties
+#### Service
 
--
 
--* Defaults defined on whiteteam
 
--* Individual team options override whiteteam options
+```bash
 
--* Properties always lowercase and hyphen delimiters - Example: Send Mail = send-mail
+name: "ICMP Ping", version: 'ipv4', protocol: 'icmp'
 
--
+```
 
--#### Property Categories
 
--
+
+#### Properties
+
+
 
 -```bash
 
--# There are four property categories
+category: 'address'
 
--# Defines a service address (each check will be run against all addresses)
+category: 'option', property: 'timeout'
 
--category: 'address'
+category: 'answer', property: 'each-line-regex'
 
--# Defines a unique service property (DNS query type: A vs AAAA vs PTR)
+category: 'answer', property: 'full-text-regex'
 
--category: 'option'
+```
 
--# Defines an property with many options (HTTP useragents)
 
--category: 'random'
 
--# Defines a property used to check for success/failure of a check
+### IRC Channel Join
 
--category: 'answer'
 
--# Defines a property used temporarily (mostly in mobility)
-
--category: 'temp'
-
--```
-
--
-
--
-
--#### Defaults
-
--* All defaults are defined under whiteteam. These defaults are used if they are not defined for a team. The most common example is the timeout property which specifies after how many seconds a check should be cancled.
-
--* Typically answer properties are also defined at the whiteteam level but can be overridden per team. There are two common types of answer properties: full-text-regex and each-line-regex. If either of these match the check is deemed to pass. DNS is one service that does not use this, instead domain answers are defined on a per team level.
-
--* Majority of checks use unix command line tools such as curl. This is to make it easier to debug. While many could be completly written using a language library, it would be difficult to troubleshoot errors for both blueteams and whiteteam.
-
--
-
--
-
--## Mobility
-
--
-
--#### IPV4 Mobility
-
--
-
--* ipv4/none/mobility
-
--* This is not a service check and is only defined for whiteteam. This service is used to configure random source ipv4 addresses. A new address is added to an alias interface based on properties. For this address to be used routes must be provided. Each route will be assigned with the src option set to the new ip.
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "IPV4 Mobility", version: 'ipv4', protocol: 'none'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--category: 'random', property: 'address-range' # Range to pick random address from: 192.168.1.1-20/24 (sample address would be: 192.168.1.5/24)
-
--category: 'option', property: 'interface' # Interface to add the random address on
-
--category: 'option', property: 'dad_test' # Test used to see if arping failed
-
--category: 'option', property: 'route' # Each route option will be pulled and updated each time a new address is selected. A value of 'default' means the route is an IP and the default gateway.
-
--category: 'option', property: 'delay' # Delay between address changes
-
--```
-
--
-
--
-
--## Available Checks ##
-
--
-
--### DNS Domain Query
-
--
-
--* ipv4/dns/domain-query
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "DNS Domain Query", version: 'ipv4', protocol: 'dns'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'option', property: 'query-type' # A, AAAA, PTR
-
--category: 'random', property: 'query' # Example value: 'google-public-dns-a.google.com'
-
--# Answer option not required if using resolves-to-address option below
-
--category: 'answer', property: '<query-property>' # Example property: google-public-dns-a.google.com', value: '8.8.8.8'
-
--# Optional
-
--category: 'option', property: 'resolves-to-address' # enabled/disabled - Used if just want to check that IP resolves and dont care what it resolves to
-
--category: 'option', property: 'resolves-to-address-regex' # Regex used to check answers and usually matches ip addresses
-
--```
-
--
-
--### FTP Download
-
--
-
--* ipv4/ftp/download
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "FTP Download", version: 'ipv4', protocol: 'ftp'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--# Uses random user
-
--# Macro: $USER replaced with current user
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'option', property: 'filename' # file the check attempts to download. Can be a path such as /var/log/messages
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
--
-
--### FTP Upload
-
--
-
--* ipv4/ftp/upload
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "FTP Upload", version: 'ipv4', protocol: 'ftp'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--# Uses random user
-
--# Macro: $USER replaced with current user
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'option', property: 'filename' # file the check attempts to upload
-
--category: 'option', property: 'filename-timestamp' # disabled = no filename timestamp
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
--
-
--### FTPS Download
-
--
-
--* ipv4/ftps/download
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "FTPS Download", version: 'ipv4', protocol: 'ftps'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--# Uses random user
-
--# Macro: $USER replaced with current user
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'option', property: 'filename' # file the check attempts to download. Can be a path such as /var/log/messages
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
--
-
--### FTPS Upload
-
--
-
--* ipv4/ftps/upload
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "FTPS Upload", version: 'ipv4', protocol: 'ftps'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--# Uses random user
-
--# Macro: $USER replaced with current user
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'option', property: 'filename' # file the check attempts to upload
-
--category: 'option', property: 'filename-timestamp' # disabled = no filename timestamp
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
--
-
--### HTTP Available
-
--
-
--* ipv4/http/available
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "HTTP Available", version: 'ipv4', protocol: 'http'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'random', property: 'useragent'
-
--category: 'random', property: 'uri' # Appended to end of address to form URL
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
-- 
-
--### HTTP Content
-
--
-
--* ipv4/http/available
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "HTTP Content", version: 'ipv4', protocol: 'http'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'random', property: 'useragent'
-
--category: 'random', property: 'uri' # Appended to end of address to form URL
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
-- 
-
--### HTTPS Available
-
--
-
--* ipv4/https/available
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "HTTPS Available", version: 'ipv4', protocol: 'https'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'random', property: 'useragent'
-
--category: 'random', property: 'uri' # Appended to end of address to form URL
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
-- 
-
--### HTTPS Content
-
--
-
--* ipv4/https/available
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "HTTPS Content", version: 'ipv4', protocol: 'https'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'random', property: 'useragent'
-
--category: 'random', property: 'uri' # Appended to end of address to form URL
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
--
-
--### ICMP Ping
-
--
-
--* ipv4/icmp/ping
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "ICMP Ping", version: 'ipv4', protocol: 'icmp'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
--
-
--### IRC Channel Join
-
--
 
 -* ipv4/irc/channel-join
 
--
 
--#### Service
 
--
+#### Service
+
+
+
+```bash
+
+name: "IRC Channel Join", version: 'ipv4', protocol: 'irc'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+# Random user picked for nickname/realname
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'option', property: 'authentication' # enabled/disabled, PASS command used if enabled
+
+category: 'random', property: 'channel'
+
+category: 'option', property: 'port'
+
+category: 'answer', property: 'each-line-regex'
+
+category: 'answer', property: 'full-text-regex'
+
+```
+
+
+
+#### POP3 Login
+
+
+
+* ipv4/pop3/login
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "POP3 Login", version: 'ipv4', protocol: 'pop3'
+
+```
+
+
+
+#### Properties
+
+
+
+```bash
+
+# Uses random user
+
+category: 'address'
+
+category: 'option', property: 'timeout'
+
+category: 'answer', property: 'each-line-regex'
+
+category: 'answer', property: 'full-text-regex'
+
+```
+
+
+
+#### POP3S Login
+
+
+
+* ipv4/pop3s/login
+
+
+
+#### Service
+
+
+
+```bash
+
+name: "POP3S Login", version: 'ipv4', protocol: 'pop3s'
+
+```
+
+
+
+#### Properties
+
+
 
 -```bash
 
--name: "IRC Channel Join", version: 'ipv4', protocol: 'irc'
+# Uses random user
 
--```
+category: 'address'
 
--
+category: 'option', property: 'timeout'
 
--#### Properties
+category: 'answer', property: 'each-line-regex'
 
--
+category: 'answer', property: 'full-text-regex'
 
--```bash
+```
 
--# Random user picked for nickname/realname
 
--category: 'address'
 
--category: 'option', property: 'timeout'
+#### SMTP Send Mail
 
--category: 'option', property: 'authentication' # enabled/disabled, PASS command used if enabled
 
--category: 'random', property: 'channel'
 
--category: 'option', property: 'port'
+* ipv4/smtp/send-mail
 
--category: 'answer', property: 'each-line-regex'
 
--category: 'answer', property: 'full-text-regex'
 
--```
+#### Service
 
--
 
--#### POP3 Login
 
--
+```bash
 
--* ipv4/pop3/login
+name: "SMTP Send Mail", version: 'ipv4', protocol: 'smtp'
 
--
+```
 
--#### Service
 
--
 
--```bash
+#### Properties
 
--name: "POP3 Login", version: 'ipv4', protocol: 'pop3'
 
--```
 
--
+```bash
 
--#### Properties
+# Uses random user
 
--
+category: 'address'
 
--```bash
+category: 'option', property: 'timeout'
 
--# Uses random user
+category: 'random', property: 'from-domain'
 
--category: 'address'
+category: 'answer', property: 'each-line-regex'
 
--category: 'option', property: 'timeout'
+category: 'answer', property: 'full-text-regex'
 
--category: 'answer', property: 'each-line-regex'
+# Optional
 
--category: 'answer', property: 'full-text-regex'
+category: 'random', property: 'rcpt-user' # Defaults to random user
 
--```
+category: 'random', property: 'rcpt-domain' # Defaults to from-domain
 
--
+category: 'random', property: 'from-user' # Defaults to random user
 
--#### POP3S Login
+```
 
--
 
--* ipv4/pop3s/login
 
--
+#### SMTPS Send Mail
 
--#### Service
 
--
 
--```bash
+* ipv4/smtps/send-mail
 
--name: "POP3S Login", version: 'ipv4', protocol: 'pop3s'
 
--```
 
--
+#### Service
 
--#### Properties
 
--
 
--```bash
+```bash
 
--# Uses random user
+name: "SMTPS Send Mail", version: 'ipv4', protocol: 'smtps'
 
--category: 'address'
+```
 
--category: 'option', property: 'timeout'
 
--category: 'answer', property: 'each-line-regex'
 
--category: 'answer', property: 'full-text-regex'
+#### Properties
 
--```
 
--
 
--#### SMTP Send Mail
+```bash
 
--
+# Uses random user
 
--* ipv4/smtp/send-mail
+category: 'address'
 
--
+category: 'option', property: 'timeout'
 
--#### Service
+category: 'random', property: 'from-domain'
 
--
+category: 'answer', property: 'each-line-regex'
 
--```bash
+category: 'answer', property: 'full-text-regex'
 
--name: "SMTP Send Mail", version: 'ipv4', protocol: 'smtp'
+# Optional
 
--```
+category: 'random', property: 'rcpt-user' # Defaults to random user
 
--
+category: 'random', property: 'rcpt-domain' # Defaults to from-domain
 
--#### Properties
+category: 'random', property: 'from-user' # Defaults to random user
 
--
+```
 
--```bash
 
--# Uses random user
 
--category: 'address'
+#### SSH Login
 
--category: 'option', property: 'timeout'
 
--category: 'random', property: 'from-domain'
 
--category: 'answer', property: 'each-line-regex'
+* ipv4/ssh/login
 
--category: 'answer', property: 'full-text-regex'
 
--# Optional
 
--category: 'random', property: 'rcpt-user' # Defaults to random user
+#### Service
 
--category: 'random', property: 'rcpt-domain' # Defaults to from-domain
 
--category: 'random', property: 'from-user' # Defaults to random user
 
--```
+```bash
 
--
+name: "SSH Login", version: 'ipv4', protocol: 'ssh'
 
--#### SMTPS Send Mail
+```
 
--
 
--* ipv4/smtps/send-mail
 
--
+#### Properties
 
--#### Service
 
--
 
--```bash
+```bash
 
--name: "SMTPS Send Mail", version: 'ipv4', protocol: 'smtps'
+# Uses random user
 
--```
+# Macro: $USER replaced with current user
 
--
+category: 'address'
 
--#### Properties
+category: 'option', property: 'timeout'
 
--
+category: 'random', property: 'command' # command to execute upon logging in
 
--```bash
+category: 'answer', property: 'each-line-regex'
 
--# Uses random user
+category: 'answer', property: 'full-text-regex'
 
--category: 'address'
+```
 
--category: 'option', property: 'timeout'
 
--category: 'random', property: 'from-domain'
 
--category: 'answer', property: 'each-line-regex'
+## License
 
--category: 'answer', property: 'full-text-regex'
-
--# Optional
-
--category: 'random', property: 'rcpt-user' # Defaults to random user
-
--category: 'random', property: 'rcpt-domain' # Defaults to from-domain
-
--category: 'random', property: 'from-user' # Defaults to random user
-
--```
-
-- 
-
--#### SSH Login
-
--
-
--* ipv4/ssh/login
-
--
-
--#### Service
-
--
-
--```bash
-
--name: "SSH Login", version: 'ipv4', protocol: 'ssh'
-
--```
-
--
-
--#### Properties
-
--
-
--```bash
-
--# Uses random user
-
--# Macro: $USER replaced with current user
-
--category: 'address'
-
--category: 'option', property: 'timeout'
-
--category: 'random', property: 'command' # command to execute upon logging in
-
--category: 'answer', property: 'each-line-regex'
-
--category: 'answer', property: 'full-text-regex'
-
--```
-
--
-
--## License
-
--Cyberengine is released under the [MIT License](http://www.opensource.org/licenses/MIT)
+Cyberengine is released under the [MIT License](http://www.opensource.org/licenses/MIT)
