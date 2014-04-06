@@ -21,20 +21,20 @@ class StaticController < ApplicationController
     end
     
     @scoreboard.each do |team_id,team|
-      @tactualpts = team[:services].map{|i,s| s[:available] }.sum.to_i
-      @tavailpts = (@tactualpts * team[:checks]).to_i
+      @ttotalpts = (1 * team[:passed])
+      @tavailpts = (1 * team[:checks])
       team[:percent] = team[:checks] == 0 ? 0 : (team[:passed].to_f/team[:checks].to_f)
-      team[:available] = @tavailpts.to_i
-      team[:points] = (@tactualpts * team[:passed]).to_i
+      team[:available] = @tavailpts
+      team[:points] = @ttotalpts
       team[:percent] = (team[:percent]*100).round(1)
       @bargraph << { y: team[:points], color: @colors[team_id % @colors.size] }
       @teams << team[:alias]
       team[:services].each do |service_id,service|
-    	@actualpts = service[:available]
-    	@actualavail = (@actualpts * service[:checks]).to_i
+    	@ptspercheck = service[:available]
+    	@actualavail = (@ptspercheck * service[:checks]).to_i
         service[:percent] = service[:checks] == 0 ? 0 : (service[:passed].to_f/service[:checks].to_f)
         service[:available] = @actualavail.to_i
-        service[:points] = (@actualpts*service[:passed]).to_i
+        service[:points] = (@ptspercheck * service[:passed]).to_i
         service[:percent] = (service[:percent]*100).round(1)
       end
     end
